@@ -1,0 +1,3 @@
+name = [TDMP] TTT (Alpha)
+author = morgana
+description = [noupload] TTT, A recreation of the garry's mod gamemode Trouble in Terrorist Town.
