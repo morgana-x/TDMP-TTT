@@ -21,3 +21,4 @@ TEAM_PREPARE = createTeam({
     description = "",
     color = {1,1,1}
 })
+

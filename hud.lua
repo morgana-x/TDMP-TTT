@@ -20,11 +20,24 @@ function drawHudDebug()
         UiFont("bold.ttf", 20)
         UiTranslate(0, -40 -(UiFontHeight() * 2))
         UiText( "Pos: " .. json.encode(GetPlayerTransform(false)["pos"]) )
+       -- UiTranslate(0,-UiFontHeight())
+       -- UiText( "Ang: " .. json.encode(GetPlayerTransform(false)["rot"]) )
         UiTranslate(0,-UiFontHeight())
-        UiText( "Ang: " .. json.encode(GetPlayerTransform(false)["rot"]) )
-        UiTranslate(0,-UiFontHeight())
-        UiText( "Map: " .. GetString("game.levelid") )
+        UiText( "Map: " .. GetLevelId())
     UiPop()
+end
+
+function drawTimeLeft(seconds)
+    UiFont("bold.ttf", 20)
+    local time = formatTime(seconds)
+    local tx, ty = UiGetTextSize(time)
+    UiColor(0,0,0,0.8)
+    UiTranslate(0, 0)
+    UiTranslate(5,-ty)
+    UiImageBox("ui/common/box-solid-shadow-50.png", tx, ty, -40, -45) 
+    UiTranslate(3, ty - 5)
+    UiColor(1,1,1,1)
+    UiText( time)
 end
 
 function drawHudCore()
@@ -33,7 +46,18 @@ function drawHudCore()
         local col = TeamColor(GetTeam(TDMP_LocalSteamID)) or {1,1,1}
         UiColor(col[1],col[2],col[3])
         UiTranslate(20, UiHeight() - UiFontHeight())
-        UiText( TeamName(GetTeam(TDMP_LocalSteamID)))
+        local name = TeamName(GetTeam(TDMP_LocalSteamID))
+        local sx, sy = UiGetTextSize(name)
+        UiText(name )
+        if GetString("game.level.state") == "STATE_PREPARE" then
+            UiTranslate(sx, 0)
+            drawTimeLeft( prepareFinish - (GetTime() + serverTimeOffset) )
+        end
+        if GetString("game.level.state") == "STATE_ACTIVE" then
+            --UiTranslate(20, UiHeight() - UiFontHeight())
+            UiTranslate(sx, 0)
+            drawTimeLeft(roundStaleMate - (GetTime() + serverTimeOffset))
+        end
     UiPop()
 end
 
@@ -131,7 +155,53 @@ function drawTeamWin()
             UiText(TeamName(team))
             UiTranslate(0, UiFontHeight())
             UiColor(1,1,1, 1)
-            UiText("The " .. TeamName(team) .. "'s win!s")
+            UiText("The " .. TeamName(team) .. "s win!")
         UiPop()
     end
+end
+
+
+local bw = 500
+local bh = 250
+function drawBodyInvestigation()
+    if not currentCorpse then return end
+    UiPush()
+    UiMakeInteractive()
+    UiTranslate(  (UiWidth()/2 ) - (bw/2),  (UiHeight() / 2) - (bh/2))
+    UiColor(0,0,0,0.8)
+    UiImageBox("ui/common/box-solid-shadow-50.png", bw, bh, -50, -50) 
+    UiColor(1,1,1,1)
+    UiFont("bold.ttf", 40)
+
+
+
+    local text = {}
+    text[1] = { {1,1,0.5}, "Name: ", {1,1,1},  currentCorpse.nick}
+    text[2] = { {1,1,0.5}, "Team: ", TeamColor(currentCorpse.team), TeamName(currentCorpse.team)}
+    text[3] = {{1,1,0.5}, "Cause of Death: ", {1,1,1}, currentCorpse.causeofDeath }
+    text[4] = {{1,1,0.5}, "Time of death: ", {1,1,1},  tostring(math.floor( serverTime - currentCorpse.timeofDeath)) .. " seconds ago" }
+    UiFont("bold.ttf", 25)
+    UiTranslate(0, 20)
+    UiText( currentCorpse.nick ..  "'s body.")
+    UiColor(1,0,0,1)
+    local closewidth = UiGetTextSize("Close")
+    UiTranslate(bw - closewidth)
+    local close = UiTextButton("Close")
+
+    UiTranslate(-(bw - closewidth))
+    for _, t in ipairs(text) do
+        UiTranslate(0,UiFontHeight() * 1.1)
+        UiColor(t[1][1],t[1][2],t[1][3],1)
+        UiText(t[2])
+        local tw, th = UiGetTextSize(t[2])
+        UiTranslate(tw,0)
+        UiColor(t[3][1], t[3][2], t[3][3])
+        UiText(t[4])
+        local tw2, th2 = UiGetTextSize(t[2])
+        UiTranslate(-tw,0)
+    end
+
+
+    if close then currentCorpse = nil  end
+    UiPop()
 end

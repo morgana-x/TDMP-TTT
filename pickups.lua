@@ -142,7 +142,7 @@ function sv_spawnAmmo(id, pos) -- do later when not spaweftrnawefpeawf
     sv_setTag(shape, "interact", "Pickup")
     sv_setTag(shape, "ammoPickup", "gun")
 end
-
+--[[
 Hook_AddListener("TDMP_ChatSuppressMessage", "TDMP_SpawnGunCmmand", function(msgData)
     msgData = json.decode(msgData)
 
@@ -159,7 +159,7 @@ Hook_AddListener("TDMP_ChatSuppressMessage", "TDMP_SpawnGunCmmand", function(msg
         local result = sv_spawnGun(ply:CurrentTool(), ply:GetPos())
         return ""
     end
-end)
+end)]]
 
 
 function pickupLogic()
